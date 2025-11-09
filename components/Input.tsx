@@ -12,7 +12,7 @@ export default function Input({ label, variant = 'primary', ...props }: InputPro
     <View>
       {label && <Text style={styles.label}>{label}</Text>}
       <View style={[styles.container, styles[variant]]}>
-        <TextInput style={styles.input} {...props} />
+        <TextInput style={styles.input} placeholderTextColor={colors.GRAY_800} {...props} />
       </View>
     </View>
   )
@@ -23,8 +23,6 @@ const styles = StyleSheet.create({
     height: 44,
     borderRadius: 8,
     paddingHorizontal: 10,
-    justifyContent: 'center',
-    alignItems: 'center',
   },
   label: {
     fontSize: 12,
