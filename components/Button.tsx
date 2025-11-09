@@ -1,3 +1,4 @@
+import { colors } from '@/constants/colors'
 import React from 'react'
 import { Pressable, PressableProps, StyleSheet, Text } from 'react-native'
 
@@ -36,16 +37,16 @@ const styles = StyleSheet.create({
   md: { width: 100, height: 38 },
   sm: { width: 50, height: 30 },
   primary: {
-    backgroundColor: '#b0a0e3',
+    backgroundColor: colors.PURPLE,
     fontSize: 14,
     fontWeight: 'bold',
-    color: '#ffffff',
+    color: colors.WHITE,
   },
   secondary: {
-    backgroundColor: '#ec4899',
+    backgroundColor: colors.PINK,
     fontSize: 14,
     fontWeight: 'bold',
-    color: '#ffffff',
+    color: colors.WHITE,
   },
   pressed: {
     opacity: 0.7,
