@@ -1,28 +1,53 @@
-import { BUTTON_SIZES, BUTTON_VARIANTS } from '@/constants/buttonStyles'
 import React from 'react'
-import { Pressable, PressableProps, Text } from 'react-native'
+import { Pressable, PressableProps, StyleSheet, Text } from 'react-native'
 
 interface ButtonProps extends PressableProps {
   label: string
-  size?: keyof typeof BUTTON_SIZES
-  variant?: keyof typeof BUTTON_VARIANTS
+  size?: 'lg' | 'md' | 'sm'
+  variant?: 'primary' | 'secondary'
 }
 
 export default function Button({ label, size = 'lg', variant = 'primary', ...props }: ButtonProps) {
-  const sizeStyle = BUTTON_SIZES[size]
-  const variantStyle = BUTTON_VARIANTS[variant]
-
   return (
     <Pressable
+      style={({ pressed }) => [
+        styles.container,
+        styles[size],
+        styles[variant],
+        pressed && styles.pressed,
+      ]}
       {...props}
-      className={`
-        w-full rounded-lg justify-center items-center 
-        ${sizeStyle.container} 
-        ${variantStyle.container}
-        active:opacity-80
-      `}
     >
-      <Text className={`font-semibold ${variantStyle.text} ${sizeStyle.text}`}>{label}</Text>
+      <Text style={styles[variant]}>{label}</Text>
     </Pressable>
   )
 }
+
+const styles = StyleSheet.create({
+  container: {
+    borderRadius: 8,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  lg: {
+    width: '100%',
+    height: 44,
+  },
+  md: { width: 100, height: 38 },
+  sm: { width: 50, height: 30 },
+  primary: {
+    backgroundColor: '#b0a0e3',
+    fontSize: 14,
+    fontWeight: 'bold',
+    color: '#ffffff',
+  },
+  secondary: {
+    backgroundColor: '#ec4899',
+    fontSize: 14,
+    fontWeight: 'bold',
+    color: '#ffffff',
+  },
+  pressed: {
+    opacity: 0.7,
+  },
+})
