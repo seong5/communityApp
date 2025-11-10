@@ -1,11 +1,10 @@
-import React from 'react'
 import { Text } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
 
-export default function HomeScreen() {
+export default function SettingScreen() {
   return (
     <SafeAreaView>
-      <Text>홈화면</Text>
+      <Text>세팅스크린</Text>
     </SafeAreaView>
   )
 }
