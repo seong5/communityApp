@@ -1,11 +1,12 @@
 import { colors } from '@/constants/colors'
-import Feather from '@expo/vector-icons/Feather'
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons'
 import Octicons from '@expo/vector-icons/Octicons'
 import React from 'react'
 import { Pressable, StyleSheet, Text, View } from 'react-native'
 
 export default function FeedCard() {
+  const isLiked = false
+
   return (
     <View style={styles.container}>
       <View style={styles.content}>
@@ -14,7 +15,11 @@ export default function FeedCard() {
       </View>
       <View style={styles.menuContent}>
         <Pressable style={styles.menu}>
-          <Feather name="heart" size={22} color="black" />
+          <Octicons
+            name={isLiked ? 'heart-fill' : 'heart'}
+            size={22}
+            color={isLiked ? colors.RED : colors.BLACK}
+          />
           <Text style={styles.menuNumber}>2</Text>
         </Pressable>
         <Pressable style={styles.menu}>

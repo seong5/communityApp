@@ -7,6 +7,7 @@ const colors = {
   GRAY_200: 'C6C8CF',
   GRAY_600: '707177',
   GRAY_800: '49494C',
+  RED: '#FF5F5F',
 }
 
 export { colors }
