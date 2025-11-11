@@ -20,13 +20,7 @@ export default function Profile({ imageUri, nickname, createdAt, onPress, option
         />
         <View>
           <Text style={styles.nickname}>{nickname}</Text>
-          <Text style={styles.createdAt}>
-            {new Date(createdAt).toLocaleDateString('ko-KR', {
-              year: 'numeric',
-              month: '2-digit',
-              day: '2-digit',
-            })}
-          </Text>
+          <Text style={styles.createdAt}>{createdAt}</Text>
         </View>
       </Pressable>
       {option}
