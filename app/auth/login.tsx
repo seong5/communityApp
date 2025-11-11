@@ -1,8 +1,10 @@
 import Button from '@/components/common/Button'
 import EmailInput from '@/components/EmailInput'
 import PasswordInput from '@/components/PasswordInput'
+import { supabase } from '@/libs/supabase'
+import { useNavigation } from '@react-navigation/native'
 import { FormProvider, useForm } from 'react-hook-form'
-import { StyleSheet, View } from 'react-native'
+import { Alert, StyleSheet, View } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
 type LoginFormValues = {
@@ -11,15 +13,33 @@ type LoginFormValues = {
 }
 
 export default function LoginScreen() {
+  const navigation: any = useNavigation()
   const loginForm = useForm<LoginFormValues>({
     defaultValues: {
       email: '',
       password: '',
     },
+    mode: 'onChange',
   })
 
-  const onSubmit = (loginFormValues: LoginFormValues) => {
-    console.log('loginFormValues', loginFormValues)
+  const onSubmit = async (values: LoginFormValues) => {
+    const { email, password } = values
+    const { error } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+    })
+    if (error) {
+      Alert.alert('로그인 실패', error.message ?? '이메일 혹은 비밀번호를 확인해주세요.')
+      return
+    }
+    Alert.alert('로그인에 성공했습니다.', '홈으로 이동합니다.', [
+      {
+        text: '확인',
+        onPress: () => {
+          navigation.navigate('(tabs)')
+        },
+      },
+    ])
   }
 
   const inset = useSafeAreaInsets()

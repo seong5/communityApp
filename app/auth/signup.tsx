@@ -30,7 +30,7 @@ export default function SignupScreen() {
 
   const onSubmit = async (values: SignupFormValues) => {
     const { email, nickname, password } = values
-    const { data, error } = await supabase.auth.signUp({
+    const { error } = await supabase.auth.signUp({
       email,
       password,
       options: {
@@ -39,11 +39,9 @@ export default function SignupScreen() {
     })
 
     if (error) {
-      console.log('회원가입 실패:', error)
       Alert.alert('회원가입 실패', error.message ?? '다시 시도해주세요.')
       return
     }
-    console.log('회원가입 성공', data)
     Alert.alert('회원가입에 성공했습니다.', '로그인 페이지로 이동합니다.', [
       {
         text: '확인',
