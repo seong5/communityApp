@@ -1,5 +1,6 @@
 import Button from '@/components/common/Button'
 import DescriptionText from '@/components/DescriptionText'
+import ImageUpload from '@/components/ImageUpload'
 import TitleText from '@/components/TitleText'
 import { supabase } from '@/libs/supabase'
 import { router } from 'expo-router'
@@ -53,6 +54,7 @@ export default function PostFeedScreen() {
       <FormProvider {...postForm}>
         <TitleText />
         <DescriptionText />
+        <ImageUpload />
         <Button label="게시하기" onPress={postForm.handleSubmit(onSubmit)} />
       </FormProvider>
     </View>
