@@ -17,6 +17,18 @@ export default function PostingLayout() {
           ),
         }}
       />
+      <Stack.Screen
+        name="EditFeed"
+        options={{
+          title: '게시물 수정',
+          headerShown: true,
+          headerLeft: () => (
+            <Link href={'/'} replace>
+              <Ionicons name="chevron-back" size={24} color="black" />
+            </Link>
+          ),
+        }}
+      />
     </Stack>
   )
 }

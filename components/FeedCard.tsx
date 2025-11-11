@@ -6,6 +6,7 @@ import { useActionSheet } from '@expo/react-native-action-sheet'
 import Feather from '@expo/vector-icons/Feather'
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons'
 import Octicons from '@expo/vector-icons/Octicons'
+import { router } from 'expo-router'
 import React from 'react'
 import { Alert, Pressable, StyleSheet, Text, View } from 'react-native'
 import Profile from './Profile'
@@ -32,6 +33,12 @@ export default function FeedCard({ feed }: FeedCardProps) {
       (selectedIndex?: number) => {
         switch (selectedIndex) {
           case 0:
+            {
+              router.push({
+                pathname: '/posting/EditFeed',
+                params: { id: String(feed.id) },
+              })
+            }
             break
           case destructiveButtonIndex:
             {
