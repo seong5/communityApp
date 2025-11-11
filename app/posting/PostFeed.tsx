@@ -11,7 +11,7 @@ type PostFormValues = {
   description: string
 }
 
-export default function PostFeed() {
+export default function PostFeedScreen() {
   const postForm = useForm<PostFormValues>({
     defaultValues: {
       title: '',
