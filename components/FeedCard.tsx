@@ -1,5 +1,7 @@
 import { colors } from '@/constants/colors'
+import { useAuthQuery } from '@/hooks/useAuthQuery'
 import { FeedPost } from '@/types'
+import Feather from '@expo/vector-icons/Feather'
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons'
 import Octicons from '@expo/vector-icons/Octicons'
 import React from 'react'
@@ -12,6 +14,9 @@ interface FeedCardProps {
 
 export default function FeedCard({ feed }: FeedCardProps) {
   const isLiked = false
+  const { data: session } = useAuthQuery()
+  const currentLoginId = session?.user?.id
+  const isMyPost = currentLoginId === feed.userId
 
   return (
     <View style={styles.container}>
@@ -21,6 +26,13 @@ export default function FeedCard({ feed }: FeedCardProps) {
           imageUri={feed.author.imageUri}
           createdAt={feed.createdAt}
           onPress={() => {}}
+          option={
+            isMyPost ? (
+              <Pressable>
+                <Feather name="more-vertical" size={24} color="black" />
+              </Pressable>
+            ) : null
+          }
         />
         <Text style={styles.title}>{feed.title}</Text>
         <Text style={styles.description}>{feed.description}</Text>
