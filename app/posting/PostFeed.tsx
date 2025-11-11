@@ -4,12 +4,13 @@ import ImageUpload from '@/components/ImageUpload'
 import TitleText from '@/components/TitleText'
 import { supabase } from '@/libs/supabase'
 import { router } from 'expo-router'
-import { FormProvider, useForm } from 'react-hook-form'
+import { Controller, FormProvider, useForm } from 'react-hook-form'
 import { Alert, StyleSheet, View } from 'react-native'
 
 type PostFormValues = {
   title: string
   description: string
+  imageUrl: string | null
 }
 
 export default function PostFeedScreen() {
@@ -17,12 +18,13 @@ export default function PostFeedScreen() {
     defaultValues: {
       title: '',
       description: '',
+      imageUrl: null,
     },
     mode: 'onChange',
   })
 
   const onSubmit = async (values: PostFormValues) => {
-    const { title, description } = values
+    const { title, description, imageUrl } = values
 
     const {
       data: { user },
@@ -36,7 +38,7 @@ export default function PostFeedScreen() {
 
     const { error } = await supabase
       .from('post')
-      .insert({ title, description, user_id: user.id })
+      .insert({ title, description, user_id: user.id, image_url: imageUrl })
       .select()
 
     if (error) {
@@ -54,7 +56,13 @@ export default function PostFeedScreen() {
       <FormProvider {...postForm}>
         <TitleText />
         <DescriptionText />
-        <ImageUpload />
+        <Controller
+          name="imageUrl"
+          control={postForm.control}
+          render={({ field: { value, onChange } }) => (
+            <ImageUpload value={value} onChange={onChange} />
+          )}
+        />
         <Button label="게시하기" onPress={postForm.handleSubmit(onSubmit)} />
       </FormProvider>
     </View>
