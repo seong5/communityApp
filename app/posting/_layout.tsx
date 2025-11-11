@@ -2,13 +2,13 @@ import { colors } from '@/constants/colors'
 import Ionicons from '@expo/vector-icons/Ionicons'
 import { Link, Stack } from 'expo-router'
 
-export default function AuthLayout() {
+export default function PostingLayout() {
   return (
     <Stack screenOptions={{ contentStyle: { backgroundColor: colors.WHITE } }}>
       <Stack.Screen
-        name="index"
+        name="PostFeed"
         options={{
-          title: '로그인',
+          title: '게시물 작성',
           headerShown: true,
           headerLeft: () => (
             <Link href={'/'} replace>
@@ -18,24 +18,15 @@ export default function AuthLayout() {
         }}
       />
       <Stack.Screen
-        name="login"
+        name="EditFeed"
         options={{
-          title: '이메일 로그인',
+          title: '게시물 수정',
           headerShown: true,
-          headerBackButtonDisplayMode: 'minimal',
           headerLeft: () => (
             <Link href={'/'} replace>
               <Ionicons name="chevron-back" size={24} color="black" />
             </Link>
           ),
-        }}
-      />
-      <Stack.Screen
-        name="signup"
-        options={{
-          title: '회원가입',
-          headerShown: true,
-          headerBackButtonDisplayMode: 'minimal',
         }}
       />
     </Stack>

@@ -1,9 +1,14 @@
 import { colors } from '@/constants/colors'
+import { useAuthQuery } from '@/hooks/useAuthQuery'
+import { useDeleteMutation } from '@/hooks/useDeleteFeedMutation'
 import { FeedPost } from '@/types'
+import { useActionSheet } from '@expo/react-native-action-sheet'
+import Feather from '@expo/vector-icons/Feather'
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons'
 import Octicons from '@expo/vector-icons/Octicons'
+import { router } from 'expo-router'
 import React from 'react'
-import { Pressable, StyleSheet, Text, View } from 'react-native'
+import { Alert, Pressable, StyleSheet, Text, View } from 'react-native'
 import Profile from './Profile'
 
 interface FeedCardProps {
@@ -12,6 +17,51 @@ interface FeedCardProps {
 
 export default function FeedCard({ feed }: FeedCardProps) {
   const isLiked = false
+  const { data: session } = useAuthQuery()
+  const currentLoginId = session?.user?.id
+  const isMyPost = currentLoginId === feed.userId
+  const { showActionSheetWithOptions } = useActionSheet()
+  const { mutate: deleteFeed } = useDeleteMutation()
+
+  const handlePressOption = () => {
+    const options = ['수정하기', '삭제하기', '취소']
+    const cancelButtonIndex = 2
+    const destructiveButtonIndex = 1
+
+    showActionSheetWithOptions(
+      { options, cancelButtonIndex, destructiveButtonIndex },
+      (selectedIndex?: number) => {
+        switch (selectedIndex) {
+          case 0:
+            {
+              router.push({
+                pathname: '/posting/EditFeed',
+                params: { id: String(feed.id) },
+              })
+            }
+            break
+          case destructiveButtonIndex:
+            {
+              Alert.alert('삭제하기', '정말 삭제하시겠습니까?', [
+                { text: '취소', style: 'cancel' },
+                {
+                  text: '삭제',
+                  style: 'destructive',
+                  onPress: () => {
+                    deleteFeed(feed.id)
+                  },
+                },
+              ])
+            }
+            break
+          case cancelButtonIndex:
+            break
+          default:
+            break
+        }
+      }
+    )
+  }
 
   return (
     <View style={styles.container}>
@@ -21,6 +71,13 @@ export default function FeedCard({ feed }: FeedCardProps) {
           imageUri={feed.author.imageUri}
           createdAt={feed.createdAt}
           onPress={() => {}}
+          option={
+            isMyPost ? (
+              <Pressable>
+                <Feather name="more-vertical" size={24} color="black" onPress={handlePressOption} />
+              </Pressable>
+            ) : null
+          }
         />
         <Text style={styles.title}>{feed.title}</Text>
         <Text style={styles.description}>{feed.description}</Text>

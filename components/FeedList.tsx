@@ -1,56 +1,64 @@
+import { useFeedListQuery } from '@/hooks/useFeedListQuery'
+import type { FeedPost } from '@/types'
 import React from 'react'
-import { FlatList, StyleSheet } from 'react-native'
+import { ActivityIndicator, FlatList, StyleSheet, Text, View } from 'react-native'
 import FeedCard from './FeedCard'
 
-const dummyData = [
-  {
-    id: 1,
-    userId: 1,
-    title: '테스트제목입니다.',
-    description: '테스트본문입니다.',
-    createdAt: '2025-11-10',
-    imageUris: [],
-    author: {
-      id: 1,
-      nickname: '성5',
-      imageUri: '',
-    },
-  },
-  {
-    id: 2,
-    userId: 1,
-    title: '테스트제목2입니다.',
-    description: '테스트본문2입니다.',
-    createdAt: '2025-11-09',
-    imageUris: [],
-    author: {
-      id: 1,
-      nickname: '성5',
-      imageUri: '',
-    },
-  },
-  {
-    id: 3,
-    userId: 1,
-    title: '테스트제목3입니다.',
-    description: '테스트본문3입니다.',
-    createdAt: '2025-11-08',
-    imageUris: [],
-    author: {
-      id: 1,
-      nickname: '성5',
-      imageUri: '',
-    },
-  },
-]
+const isInfiniteData = (data: unknown): data is { pages: FeedPost[][] } => {
+  return !!(data && typeof data === 'object' && 'pages' in data)
+}
 
 export default function FeedList() {
+  const { data, isLoading, isError, fetchNextPage, hasNextPage, isFetchingNextPage, refetch } =
+    useFeedListQuery({ mode: 'infinite' })
+
+  const posts = isInfiniteData(data) ? data.pages.flat() : ((data as FeedPost[]) ?? [])
+
+  if (isLoading && posts.length === 0) {
+    return (
+      <View style={styles.center}>
+        <ActivityIndicator />
+      </View>
+    )
+  }
+
+  if (isError) {
+    return (
+      <View style={styles.center}>
+        <Text>피드를 불러오지 못했습니다.</Text>
+      </View>
+    )
+  }
+
+  if (!isLoading && posts.length === 0) {
+    return (
+      <View style={styles.center}>
+        <Text>피드가 없습니다.</Text>
+      </View>
+    )
+  }
+
   return (
     <FlatList
-      data={dummyData}
+      data={posts}
       renderItem={({ item }) => <FeedCard feed={item} />}
       keyExtractor={(item) => String(item.id)}
       contentContainerStyle={styles.contentContainer}
+      refreshing={isLoading}
+      onRefresh={refetch}
+      onEndReachedThreshold={0.5}
+      onEndReached={() => {
+        if (hasNextPage && !isFetchingNextPage) {
+          fetchNextPage()
+        }
+      }}
+      ListFooterComponent={
+        isFetchingNextPage ? (
+          <View style={styles.footer}>
+            <ActivityIndicator />
+          </View>
+        ) : null
+      }
     />
   )
 }
@@ -59,5 +67,13 @@ const styles = StyleSheet.create({
   contentContainer: {
     padding: 10,
     gap: 10,
+  },
+  center: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  footer: {
+    paddingVertical: 16,
   },
 })

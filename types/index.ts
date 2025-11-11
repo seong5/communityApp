@@ -1,5 +1,5 @@
 interface User {
-  id: number
+  id: string
   nickname: string
   imageUri?: string
 }
@@ -17,7 +17,7 @@ interface Profile extends User {
 }
 
 interface ImageUri {
-  id?: number
+  id?: string
   uri: string
 }
 
@@ -34,7 +34,7 @@ interface CreateCommentDto {
 }
 
 interface Comment {
-  id: number
+  id: string
   content: string
   createdAt: string
   user: User
@@ -42,8 +42,8 @@ interface Comment {
 }
 
 interface FeedPost {
-  id: number
-  userId: number
+  id: string
+  userId: string
   title: string
   description: string
   createdAt: string

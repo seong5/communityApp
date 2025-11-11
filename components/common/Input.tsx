@@ -12,7 +12,14 @@ export default function Input({ label, variant = 'primary', error = '', ...props
   return (
     <View>
       {label && <Text style={styles.label}>{label}</Text>}
-      <View style={[styles.container, styles[variant], Boolean(error) && styles.inputError]}>
+      <View
+        style={[
+          styles.container,
+          styles[variant],
+          props.multiline && styles.multiline,
+          Boolean(error) && styles.inputError,
+        ]}
+      >
         <TextInput style={styles.input} placeholderTextColor={colors.GRAY_800} {...props} />
       </View>
       {Boolean(error) && <Text style={styles.error}>{error}</Text>}
@@ -56,5 +63,9 @@ const styles = StyleSheet.create({
   },
   inputError: {
     borderColor: colors.RED,
+  },
+  multiline: {
+    height: 250,
+    paddingVertical: 15,
   },
 })
