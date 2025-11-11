@@ -60,6 +60,7 @@ export default function PostFeedScreen() {
         <Controller
           name="imageUrl"
           control={postForm.control}
+          defaultValue={null}
           render={({ field: { value, onChange } }) => (
             <>
               <ImageUpload value={value} onChange={onChange} />
