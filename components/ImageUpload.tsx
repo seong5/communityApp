@@ -1,5 +1,7 @@
 import { supabase } from '@/libs/supabase'
 import Feather from '@expo/vector-icons/Feather'
+import { decode } from 'base64-arraybuffer'
+import * as FileSystem from 'expo-file-system/legacy'
 import * as ImagePicker from 'expo-image-picker'
 import React, { useEffect, useState } from 'react'
 import { Alert, Image, Pressable, View } from 'react-native'
@@ -32,17 +34,18 @@ export default function ImageUpload({ value, onChange }: ImageUploadProps) {
     setImageUri(asset.uri)
 
     try {
+      const base64 = await FileSystem.readAsStringAsync(asset.uri, {
+        encoding: 'base64',
+      })
+
+      const arrayBuffer = decode(base64)
+
       const filePath = `uploads/${Date.now()}-${asset.fileName ?? 'image.jpg'}`
-      const file = {
-        uri: asset.uri,
-        name: asset.fileName ?? 'image.jpg',
-        type: asset.mimeType ?? 'image/jpeg',
-      }
+      const contentType = asset.mimeType ?? 'image/jpeg'
 
       const { error } = await supabase.storage
         .from('images')
-        // @ts-ignore : RN 업로드 타입
-        .upload(filePath, file, { cacheControl: '3600', upsert: false, contentType: file.type })
+        .upload(filePath, arrayBuffer, { cacheControl: '3600', upsert: false, contentType })
 
       if (error) throw error
 
