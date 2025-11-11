@@ -23,6 +23,11 @@ export default function AuthLayout() {
           title: '이메일 로그인',
           headerShown: true,
           headerBackButtonDisplayMode: 'minimal',
+          headerLeft: () => (
+            <Link href={'/'} replace>
+              <Ionicons name="chevron-back" size={24} color="black" />
+            </Link>
+          ),
         }}
       />
       <Stack.Screen
