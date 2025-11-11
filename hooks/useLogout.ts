@@ -12,7 +12,7 @@ export const useLogout = () => {
       if (error) throw error
     },
     onSuccess: () => {
-      router.replace('/auth/login')
+      router.replace('/')
     },
     onError: (error: any) => {
       Alert.alert('로그아웃 실패', error.message ?? '다시 시도해 주세요.')
