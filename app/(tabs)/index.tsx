@@ -7,7 +7,8 @@ import { SafeAreaView } from 'react-native-safe-area-context'
 export default function HomeScreen() {
   return (
     <SafeAreaView>
-      <Button label="버튼" onPress={() => router.push('/auth')} />
+      <Button label="로그인/회원가입" size="md" onPress={() => router.push('/auth')} />
+      <Button label="글쓰기" size="md" onPress={() => router.push('/posting/PostFeed')} />
       <FeedList />
     </SafeAreaView>
   )
