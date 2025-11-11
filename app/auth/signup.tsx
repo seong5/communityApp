@@ -1,5 +1,6 @@
 import Button from '@/components/common/Button'
 import EmailInput from '@/components/EmailInput'
+import NicknameInput from '@/components/NicknameInput'
 import PasswordConfirmInput from '@/components/PasswordConfirmInput'
 import PasswordInput from '@/components/PasswordInput'
 import { FormProvider, useForm } from 'react-hook-form'
@@ -31,6 +32,7 @@ export default function SignupScreen() {
     <FormProvider {...signupForm}>
       <View style={styles.container}>
         <EmailInput />
+        <NicknameInput />
         <PasswordInput />
         <PasswordConfirmInput />
       </View>
