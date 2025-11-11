@@ -144,8 +144,8 @@ const styles = StyleSheet.create({
     fontSize: 14,
   },
   images: {
-    width: '100%',
-    height: 200,
+    width: 180,
+    height: 180,
     borderRadius: 12,
   },
 })
