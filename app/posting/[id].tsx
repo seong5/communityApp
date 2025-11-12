@@ -2,11 +2,12 @@ import CommentCard from '@/components/CommentCard'
 import Button from '@/components/common/Button'
 import FeedCard from '@/components/FeedCard'
 import { colors } from '@/constants/colors'
+import { useAuthQuery } from '@/hooks/useAuthQuery'
 import { useCommentListQuery } from '@/hooks/useCommentListQuery'
 import { useCreateCommentMutation } from '@/hooks/useCreateCommentMutation'
 import { supabase } from '@/libs/supabase'
 import type { FeedPost } from '@/types'
-import { useLocalSearchParams } from 'expo-router'
+import { useLocalSearchParams, useRouter } from 'expo-router'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import {
   ActivityIndicator,
@@ -22,6 +23,7 @@ import {
 const TABLE = 'post'
 
 export default function FeedDetailScreen() {
+  const router = useRouter()
   const { id } = useLocalSearchParams<{ id: string }>()
   const [data, setData] = useState<FeedPost | null>(null)
   const [loading, setLoading] = useState(true)
@@ -29,6 +31,9 @@ export default function FeedDetailScreen() {
   const [error, setError] = useState<string | null>(null)
   const postId = typeof id === 'string' ? id : null
   const [commentContent, setCommentContent] = useState('')
+
+  const { data: session } = useAuthQuery()
+  const isLoggedIn = Boolean(session)
 
   const {
     data: comments = [],
@@ -40,8 +45,8 @@ export default function FeedDetailScreen() {
   const isCommentsLoading = commentsLoading || commentsFetching
   const { mutate: createComment, isPending: isCreatingComment } = useCreateCommentMutation()
   const isSubmitDisabled = useMemo(
-    () => isCreatingComment || !commentContent.trim(),
-    [isCreatingComment, commentContent]
+    () => isCreatingComment || !commentContent.trim() || !isLoggedIn,
+    [isCreatingComment, commentContent, isLoggedIn]
   )
 
   const fetchDetail = useCallback(async () => {
@@ -111,6 +116,20 @@ export default function FeedDetailScreen() {
   const handleSubmitComment = useCallback(() => {
     if (!postId) return
 
+    if (!isLoggedIn) {
+      Alert.alert('로그인이 필요합니다.', '댓글을 작성하려면 로그인이 필요합니다.', [
+        {
+          text: '취소',
+          style: 'cancel',
+        },
+        {
+          text: '로그인',
+          onPress: () => router.push('/auth/login'),
+        },
+      ])
+      return
+    }
+
     const trimmed = commentContent.trim()
     if (!trimmed) {
       Alert.alert('알림', '댓글 내용을 입력해주세요.')
@@ -126,7 +145,7 @@ export default function FeedDetailScreen() {
         },
       }
     )
-  }, [commentContent, createComment, postId, refetchComments])
+  }, [commentContent, createComment, postId, refetchComments, isLoggedIn, router])
 
   if (loading) {
     return (
@@ -157,11 +176,25 @@ export default function FeedDetailScreen() {
           <TextInput
             value={commentContent}
             onChangeText={setCommentContent}
-            placeholder="댓글을 입력해주세요."
+            placeholder={isLoggedIn ? '댓글을 입력해주세요.' : '로그인이 필요합니다.'}
             multiline
             style={styles.commentTextInput}
-            editable={!isCreatingComment}
+            editable={!isCreatingComment && isLoggedIn}
             placeholderTextColor={colors.GRAY_600}
+            onFocus={() => {
+              if (!isLoggedIn) {
+                Alert.alert('로그인이 필요합니다.', '댓글을 작성하려면 로그인이 필요합니다.', [
+                  {
+                    text: '취소',
+                    style: 'cancel',
+                  },
+                  {
+                    text: '로그인',
+                    onPress: () => router.push('/auth/login'),
+                  },
+                ])
+              }
+            }}
           />
           <Button
             label={isCreatingComment ? '작성 중...' : '댓글 등록'}
