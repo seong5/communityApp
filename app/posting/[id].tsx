@@ -1,11 +1,23 @@
 import CommentCard from '@/components/CommentCard'
+import Button from '@/components/common/Button'
 import FeedCard from '@/components/FeedCard'
 import { colors } from '@/constants/colors'
+import { useCommentListQuery } from '@/hooks/useCommentListQuery'
+import { useCreateCommentMutation } from '@/hooks/useCreateCommentMutation'
 import { supabase } from '@/libs/supabase'
 import type { FeedPost } from '@/types'
 import { useLocalSearchParams } from 'expo-router'
-import { useCallback, useEffect, useState } from 'react'
-import { ActivityIndicator, RefreshControl, ScrollView, Text, View } from 'react-native'
+import { useCallback, useEffect, useMemo, useState } from 'react'
+import {
+  ActivityIndicator,
+  Alert,
+  RefreshControl,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  View,
+} from 'react-native'
 
 const TABLE = 'post'
 
@@ -15,16 +27,32 @@ export default function FeedDetailScreen() {
   const [loading, setLoading] = useState(true)
   const [refreshing, setRefreshing] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const postId = typeof id === 'string' ? id : null
+  const [commentContent, setCommentContent] = useState('')
+
+  const {
+    data: comments = [],
+    isLoading: commentsLoading,
+    isFetching: commentsFetching,
+    error: commentsError,
+    refetch: refetchComments,
+  } = useCommentListQuery({ postId, mode: 'tree' })
+  const isCommentsLoading = commentsLoading || commentsFetching
+  const { mutate: createComment, isPending: isCreatingComment } = useCreateCommentMutation()
+  const isSubmitDisabled = useMemo(
+    () => isCreatingComment || !commentContent.trim(),
+    [isCreatingComment, commentContent]
+  )
 
   const fetchDetail = useCallback(async () => {
-    if (!id) return
+    if (!postId) return
     setError(null)
     setLoading(true)
 
     const { data: post, error: postErr } = await supabase
       .from(TABLE)
       .select('id, title, description, user_id, created_at, image_url')
-      .eq('id', id)
+      .eq('id', postId)
       .single()
 
     if (postErr) {
@@ -66,17 +94,39 @@ export default function FeedDetailScreen() {
 
     setData(mapped)
     setLoading(false)
-  }, [id])
+  }, [postId])
 
   useEffect(() => {
+    if (!postId) return
     fetchDetail()
-  }, [fetchDetail])
+    refetchComments()
+  }, [fetchDetail, refetchComments, postId])
 
   const onRefresh = useCallback(async () => {
     setRefreshing(true)
-    await fetchDetail()
+    await Promise.all([fetchDetail(), refetchComments()])
     setRefreshing(false)
-  }, [fetchDetail])
+  }, [fetchDetail, refetchComments])
+
+  const handleSubmitComment = useCallback(() => {
+    if (!postId) return
+
+    const trimmed = commentContent.trim()
+    if (!trimmed) {
+      Alert.alert('알림', '댓글 내용을 입력해주세요.')
+      return
+    }
+
+    createComment(
+      { postId, content: trimmed },
+      {
+        onSuccess: () => {
+          setCommentContent('')
+          refetchComments()
+        },
+      }
+    )
+  }, [commentContent, createComment, postId, refetchComments])
 
   if (loading) {
     return (
@@ -101,7 +151,63 @@ export default function FeedDetailScreen() {
       refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
     >
       <FeedCard feed={data} isDetail />
-      <CommentCard />
+      <View style={styles.commentSection}>
+        <Text style={styles.commentTitle}>댓글</Text>
+        <View style={styles.commentInputContainer}>
+          <TextInput
+            value={commentContent}
+            onChangeText={setCommentContent}
+            placeholder="댓글을 입력해주세요."
+            multiline
+            style={styles.commentTextInput}
+            editable={!isCreatingComment}
+            placeholderTextColor={colors.GRAY_600}
+          />
+          <Button
+            label={isCreatingComment ? '작성 중...' : '댓글 등록'}
+            onPress={handleSubmitComment}
+            disabled={isSubmitDisabled}
+          />
+        </View>
+        {isCommentsLoading ? <ActivityIndicator /> : null}
+        {commentsError ? <Text style={{ color: 'red' }}>댓글을 불러오지 못했습니다.</Text> : null}
+        {!isCommentsLoading && comments.length === 0 ? (
+          <Text style={{ color: colors.GRAY_600 }}>첫 댓글을 남겨보세요.</Text>
+        ) : null}
+        {comments.map((comment) => (
+          <CommentCard key={comment.id} comment={comment} />
+        ))}
+      </View>
     </ScrollView>
   )
 }
+
+const styles = StyleSheet.create({
+  commentSection: {
+    marginTop: 20,
+  },
+  commentTitle: {
+    fontSize: 16,
+    fontWeight: '600',
+    marginBottom: 8,
+    color: colors.GRAY_800,
+  },
+  commentInputContainer: {
+    backgroundColor: colors.WHITE,
+    borderRadius: 10,
+    padding: 12,
+    marginBottom: 16,
+    gap: 12,
+  },
+  commentTextInput: {
+    minHeight: 80,
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+    borderWidth: 1,
+    borderColor: colors.GRAY_200,
+    borderRadius: 8,
+    fontSize: 14,
+    color: colors.GRAY_800,
+    textAlignVertical: 'top',
+  },
+})
