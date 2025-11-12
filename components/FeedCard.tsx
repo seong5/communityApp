@@ -13,9 +13,10 @@ import Profile from './Profile'
 
 interface FeedCardProps {
   feed: FeedPost
+  isDetail?: boolean
 }
 
-export default function FeedCard({ feed }: FeedCardProps) {
+export default function FeedCard({ feed, isDetail = false }: FeedCardProps) {
   const isLiked = false
   const { data: session } = useAuthQuery()
   const currentLoginId = session?.user?.id
@@ -63,9 +64,15 @@ export default function FeedCard({ feed }: FeedCardProps) {
       }
     )
   }
+  const handlePressGotoDetail = () => {
+    if (!isDetail) {
+      router.push(`/posting/${feed.id}`)
+    }
+  }
+  const GoToDetail = isDetail ? View : Pressable
 
   return (
-    <View style={styles.container}>
+    <GoToDetail onPress={handlePressGotoDetail} style={styles.container}>
       <View style={styles.content}>
         <Profile
           nickname={feed.author.nickname}
@@ -103,7 +110,7 @@ export default function FeedCard({ feed }: FeedCardProps) {
           <Octicons name="share" size={22} color="black" />
         </Pressable>
       </View>
-    </View>
+    </GoToDetail>
   )
 }
 
