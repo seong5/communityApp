@@ -8,7 +8,7 @@ import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons'
 import Octicons from '@expo/vector-icons/Octicons'
 import { router } from 'expo-router'
 import React from 'react'
-import { Alert, Pressable, StyleSheet, Text, View } from 'react-native'
+import { Alert, Image, Pressable, StyleSheet, Text, View } from 'react-native'
 import Profile from './Profile'
 
 interface FeedCardProps {
@@ -22,6 +22,7 @@ export default function FeedCard({ feed }: FeedCardProps) {
   const isMyPost = currentLoginId === feed.userId
   const { showActionSheetWithOptions } = useActionSheet()
   const { mutate: deleteFeed } = useDeleteMutation()
+  const firstImage = feed.imageUris[0]
 
   const handlePressOption = () => {
     const options = ['수정하기', '삭제하기', '취소']
@@ -81,6 +82,9 @@ export default function FeedCard({ feed }: FeedCardProps) {
         />
         <Text style={styles.title}>{feed.title}</Text>
         <Text style={styles.description}>{feed.description}</Text>
+        {firstImage && firstImage.uri ? (
+          <Image source={{ uri: firstImage.uri }} style={styles.images} />
+        ) : null}
       </View>
       <View style={styles.menuContent}>
         <Pressable style={styles.menu}>
@@ -138,5 +142,10 @@ const styles = StyleSheet.create({
   },
   menuNumber: {
     fontSize: 14,
+  },
+  images: {
+    width: 180,
+    height: 180,
+    borderRadius: 12,
   },
 })

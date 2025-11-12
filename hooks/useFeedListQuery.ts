@@ -15,6 +15,7 @@ type PostRow = {
   description: string
   created_at: string
   user_id: string
+  image_url: string | null
 }
 
 const mapRowsToFeedPosts = (rows: PostRow[]): FeedPost[] =>
@@ -29,7 +30,13 @@ const mapRowsToFeedPosts = (rows: PostRow[]): FeedPost[] =>
       nickname: '익명',
       imageUri: '',
     },
-    imageUris: [],
+    imageUris: row.image_url
+      ? [
+          {
+            uri: row.image_url,
+          },
+        ]
+      : [],
   }))
 
 type Mode = 'single' | 'infinite'
