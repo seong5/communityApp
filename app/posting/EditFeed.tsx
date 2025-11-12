@@ -1,17 +1,20 @@
 import Button from '@/components/common/Button'
 import DescriptionText from '@/components/DescriptionText'
+import ImageUpload from '@/components/ImageUpload'
+import PreviewImages from '@/components/PreviewImages'
 import TitleText from '@/components/TitleText'
 import { useAuthQuery } from '@/hooks/useAuthQuery'
 import { supabase } from '@/libs/supabase'
 import { useQueryClient } from '@tanstack/react-query'
 import { useLocalSearchParams, useRouter } from 'expo-router'
 import { useEffect } from 'react'
-import { FormProvider, useForm } from 'react-hook-form'
+import { Controller, FormProvider, useForm } from 'react-hook-form'
 import { Alert, StyleSheet, View } from 'react-native'
 
 type PostFormValues = {
   title: string
   description: string
+  imageUrl: string | null
 }
 
 export default function EditFeedScreen() {
@@ -24,6 +27,7 @@ export default function EditFeedScreen() {
     defaultValues: {
       title: '',
       description: '',
+      imageUrl: null,
     },
     mode: 'onChange',
   })
@@ -33,7 +37,7 @@ export default function EditFeedScreen() {
       if (!id) return
       const { data, error } = await supabase
         .from('post')
-        .select('title, description, user_id')
+        .select('title, description, user_id, image_url')
         .eq('id', id)
         .single()
 
@@ -46,6 +50,7 @@ export default function EditFeedScreen() {
       postForm.reset({
         title: data.title,
         description: data.description,
+        imageUrl: data.image_url,
       })
     }
     fetchPost()
@@ -53,9 +58,12 @@ export default function EditFeedScreen() {
 
   const onSubmit = async (values: PostFormValues) => {
     if (!id) return
-    const { title, description } = values
+    const { title, description, imageUrl } = values
 
-    const { error } = await supabase.from('post').update({ title, description }).eq('id', id)
+    const { error } = await supabase
+      .from('post')
+      .update({ title, description, image_url: imageUrl })
+      .eq('id', id)
 
     if (error) {
       Alert.alert('게시물 수정 실패', error.message)
@@ -70,6 +78,17 @@ export default function EditFeedScreen() {
       <FormProvider {...postForm}>
         <TitleText />
         <DescriptionText />
+        <Controller
+          name="imageUrl"
+          control={postForm.control}
+          defaultValue={null}
+          render={({ field: { value, onChange } }) => (
+            <>
+              <ImageUpload value={value} onChange={onChange} />
+              <PreviewImages url={value} />
+            </>
+          )}
+        />
         <Button label="수정하기" onPress={postForm.handleSubmit(onSubmit)} />
       </FormProvider>
     </View>

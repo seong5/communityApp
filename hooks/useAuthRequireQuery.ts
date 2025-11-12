@@ -3,22 +3,43 @@ import { useEffect } from 'react'
 import { Alert } from 'react-native'
 import { useAuthQuery } from './useAuthQuery'
 
-export const useAuthRequireQuery = () => {
+type RequireOptions = {
+  redirectTo?: string | null
+  showAlert?: boolean
+  alertMessage?: string
+  alertConfirmText?: string
+}
+
+export const useAuthRequireQuery = (options?: RequireOptions) => {
   const router = useRouter()
   const { data: session, isLoading } = useAuthQuery()
+
+  const redirectTo = options?.redirectTo ?? '/auth/login'
+  const showAlert = options?.showAlert ?? true
+  const alertMessage = options?.alertMessage ?? '로그인 페이지로 이동합니다.'
+  const alertConfirmText = options?.alertConfirmText ?? '이동'
 
   useEffect(() => {
     if (isLoading) return
 
     if (!session) {
-      Alert.alert('로그인이 필요합니다.', '로그인 페이지로 이동합니다.', [
-        {
-          text: '이동',
-          onPress: () => {
-            router.replace('/auth/login')
+      if (!redirectTo) {
+        return
+      }
+
+      if (showAlert) {
+        Alert.alert('로그인이 필요합니다.', alertMessage, [
+          {
+            text: alertConfirmText,
+            onPress: () => {
+              router.push('/auth/login')
+            },
           },
-        },
-      ])
+        ])
+        return
+      }
+
+      router.push('/')
     }
-  }, [session, isLoading, router])
+  }, [session, isLoading, router, redirectTo, showAlert, alertMessage, alertConfirmText])
 }

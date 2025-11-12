@@ -29,7 +29,7 @@ interface CreatePostDto {
 
 interface CreateCommentDto {
   content: string
-  postId: number
+  postId: string
   parentCommentId?: number
 }
 

@@ -29,6 +29,18 @@ export default function PostingLayout() {
           ),
         }}
       />
+      <Stack.Screen
+        name="[id]"
+        options={{
+          title: '상세 페이지',
+          headerShown: true,
+          headerLeft: () => (
+            <Link href={'/'} replace>
+              <Ionicons name="chevron-back" size={24} color="black" />
+            </Link>
+          ),
+        }}
+      />
     </Stack>
   )
 }
