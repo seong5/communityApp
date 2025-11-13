@@ -76,7 +76,7 @@ const buildCommentTree = (comments: CommentWithParent[]): CommentTreeNode[] => {
   })
 
   const sortByCreatedAt = (a: CommentTreeNode, b: CommentTreeNode) =>
-    new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
+    new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
 
   const sortTree = (nodes: CommentTreeNode[]) => {
     nodes.sort(sortByCreatedAt)
@@ -109,7 +109,7 @@ export function useCommentListQuery<M extends CommentListMode>(
         .from('comments')
         .select('id, post_id, user_id, content, parent_comment_id, is_deleted, created_at')
         .eq('post_id', postId)
-        .order('created_at', { ascending: true })
+        .order('created_at', { ascending: false })
 
       if (error) throw error
 
@@ -131,7 +131,7 @@ export function useCommentListQuery<M extends CommentListMode>(
           .in('id', userIds)
 
         if (profileError) {
-          console.warn('댓글 프로필 조회 실패:', profileError)
+          // 프로필 조회 실패 시 무시
         }
 
         if (profiles) {
