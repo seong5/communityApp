@@ -4,7 +4,7 @@ import { useAuthQuery } from '@/hooks/useAuthQuery'
 import { useLogout } from '@/hooks/useLogout'
 import { router } from 'expo-router'
 import React, { useCallback } from 'react'
-import { StyleSheet, View } from 'react-native'
+import { Alert, StyleSheet, View } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
 
 export default function HomeScreen() {
@@ -14,7 +14,16 @@ export default function HomeScreen() {
 
   const handlePressPost = useCallback(() => {
     if (!isLoggedIn) {
-      router.push('/auth/login')
+      Alert.alert('로그인이 필요합니다.', '글을 작성하려면 로그인이 필요합니다.', [
+        {
+          text: '취소',
+          style: 'cancel',
+        },
+        {
+          text: '로그인',
+          onPress: () => router.push('/auth/login'),
+        },
+      ])
       return
     }
     router.push('/posting/PostFeed')
