@@ -19,36 +19,46 @@ type PostRow = {
 }
 
 const mapRowsToFeedPosts = async (rows: PostRow[]): Promise<FeedPost[]> => {
-  const postsWithCommentCount = await Promise.all(
+  // 현재 로그인한 사용자 ID 가져오기
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+  const currentUserId = user?.id
+
+  const postsWithCounts = await Promise.all(
     rows.map(async (row) => {
-      const { count, error } = await supabase
+      // 댓글 개수 가져오기
+      const { count: commentCount, error: commentError } = await supabase
         .from('comments')
         .select('*', { count: 'exact', head: true })
         .eq('post_id', row.id)
         .eq('is_deleted', false)
 
-      if (error) {
-        console.error('Error fetching comment count:', error)
-        return {
-          id: row.id,
-          userId: row.user_id,
-          title: row.title,
-          description: row.description,
-          createdAt: row.created_at,
-          author: {
-            id: row.user_id,
-            nickname: '익명',
-            imageUri: '',
-          },
-          imageUris: row.image_url
-            ? [
-                {
-                  uri: row.image_url,
-                },
-              ]
-            : [],
-          commentCount: 0,
-        }
+      if (commentError) {
+        console.error('Error fetching comment count:', commentError)
+      }
+
+      // 좋아요 개수 가져오기
+      const { count: likeCount, error: likeError } = await supabase
+        .from('likes')
+        .select('*', { count: 'exact', head: true })
+        .eq('post_id', row.id)
+
+      if (likeError) {
+        console.error('Error fetching like count:', likeError)
+      }
+
+      // 현재 사용자가 좋아요를 눌렀는지 확인
+      let isLiked = false
+      if (currentUserId) {
+        const { data: likeData } = await supabase
+          .from('likes')
+          .select('id')
+          .eq('post_id', row.id)
+          .eq('user_id', currentUserId)
+          .maybeSingle()
+
+        isLiked = !!likeData
       }
 
       return {
@@ -72,12 +82,14 @@ const mapRowsToFeedPosts = async (rows: PostRow[]): Promise<FeedPost[]> => {
             return [{ uri: row.image_url }]
           }
         })(),
-        commentCount: count ?? 0,
+        commentCount: commentCount ?? 0,
+        likeCount: likeCount ?? 0,
+        isLiked,
       }
     })
   )
 
-  return postsWithCommentCount
+  return postsWithCounts
 }
 
 type Mode = 'single' | 'infinite'

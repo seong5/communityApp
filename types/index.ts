@@ -50,6 +50,8 @@ interface FeedPost {
   author: User
   imageUris: ImageUri[]
   commentCount?: number
+  likeCount?: number
+  isLiked?: boolean
 }
 
 export type { Comment, CreateCommentDto, CreatePostDto, FeedPost, ImageUri, Profile }

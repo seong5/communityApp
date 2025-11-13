@@ -1,6 +1,7 @@
 import { colors } from '@/constants/colors'
 import { useAuthQuery } from '@/hooks/useAuthQuery'
 import { useDeleteMutation } from '@/hooks/useDeleteFeedMutation'
+import { useToggleLikeMutation } from '@/hooks/useToggleLikeMutation'
 import { FeedPost } from '@/types'
 import { useActionSheet } from '@expo/react-native-action-sheet'
 import Feather from '@expo/vector-icons/Feather'
@@ -14,16 +15,32 @@ import Profile from './Profile'
 interface FeedCardProps {
   feed: FeedPost
   isDetail?: boolean
+  onLikePress?: () => void
 }
 
-export default function FeedCard({ feed, isDetail = false }: FeedCardProps) {
-  const isLiked = false
+export default function FeedCard({ feed, isDetail = false, onLikePress }: FeedCardProps) {
   const { data: session } = useAuthQuery()
   const currentLoginId = session?.user?.id
   const isMyPost = currentLoginId === feed.userId
   const { showActionSheetWithOptions } = useActionSheet()
   const { mutate: deleteFeed } = useDeleteMutation()
+  const { mutate: toggleLike } = useToggleLikeMutation()
   const images = feed.imageUris
+  const isLiked = feed.isLiked ?? false
+  const likeCount = feed.likeCount ?? 0
+
+  const handlePressLike = () => {
+    if (!session) {
+      Alert.alert('로그인이 필요합니다.', '좋아요를 누르려면 로그인이 필요합니다.')
+      return
+    }
+
+    if (onLikePress) {
+      onLikePress()
+    } else {
+      toggleLike({ postId: feed.id, isLiked })
+    }
+  }
 
   const handlePressOption = () => {
     const options = ['수정하기', '삭제하기', '취소']
@@ -102,13 +119,13 @@ export default function FeedCard({ feed, isDetail = false }: FeedCardProps) {
         ) : null}
       </View>
       <View style={styles.menuContent}>
-        <Pressable style={styles.menu}>
+        <Pressable style={styles.menu} onPress={handlePressLike}>
           <Octicons
             name={isLiked ? 'heart-fill' : 'heart'}
             size={22}
             color={isLiked ? colors.RED : colors.BLACK}
           />
-          <Text style={styles.menuNumber}>2</Text>
+          <Text style={styles.menuNumber}>{likeCount}</Text>
         </Pressable>
         <Pressable style={styles.menu}>
           <MaterialCommunityIcons name="message-reply-outline" size={22} color="black" />

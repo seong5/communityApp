@@ -5,6 +5,7 @@ import { colors } from '@/constants/colors'
 import { useAuthQuery } from '@/hooks/useAuthQuery'
 import { useCommentListQuery } from '@/hooks/useCommentListQuery'
 import { useCreateCommentMutation } from '@/hooks/useCreateCommentMutation'
+import { useToggleLikeMutation } from '@/hooks/useToggleLikeMutation'
 import { supabase } from '@/libs/supabase'
 import type { FeedPost } from '@/types'
 import { useLocalSearchParams, useRouter } from 'expo-router'
@@ -44,10 +45,36 @@ export default function FeedDetailScreen() {
   } = useCommentListQuery({ postId, mode: 'tree' })
   const isCommentsLoading = commentsLoading || commentsFetching
   const { mutate: createComment, isPending: isCreatingComment } = useCreateCommentMutation()
+  const { mutate: toggleLike } = useToggleLikeMutation()
   const isSubmitDisabled = useMemo(
     () => isCreatingComment || !commentContent.trim() || !isLoggedIn,
     [isCreatingComment, commentContent, isLoggedIn]
   )
+
+  const handleLikePress = useCallback(() => {
+    if (!data || !postId) return
+    if (!isLoggedIn) {
+      Alert.alert('로그인이 필요합니다.', '좋아요를 누르려면 로그인이 필요합니다.')
+      return
+    }
+
+    const currentIsLiked = data.isLiked ?? false
+    toggleLike(
+      { postId, isLiked: currentIsLiked },
+      {
+        onSuccess: () => {
+          setData((prev) => {
+            if (!prev) return prev
+            return {
+              ...prev,
+              isLiked: !currentIsLiked,
+              likeCount: (prev.likeCount ?? 0) + (currentIsLiked ? -1 : 1),
+            }
+          })
+        },
+      }
+    )
+  }, [data, postId, isLoggedIn, toggleLike])
 
   const fetchDetail = useCallback(async () => {
     if (!postId) return
@@ -83,7 +110,6 @@ export default function FeedDetailScreen() {
       }
     }
 
-    // 댓글 개수 가져오기
     const { count: commentCount, error: commentCountError } = await supabase
       .from('comments')
       .select('*', { count: 'exact', head: true })
@@ -94,7 +120,27 @@ export default function FeedDetailScreen() {
       console.error('Error fetching comment count:', commentCountError)
     }
 
-    // image_url이 JSON 배열인지 단일 문자열인지 확인
+    const { count: likeCount, error: likeError } = await supabase
+      .from('likes')
+      .select('*', { count: 'exact', head: true })
+      .eq('post_id', postId)
+
+    if (likeError) {
+      console.error('Error fetching like count:', likeError)
+    }
+
+    let isLiked = false
+    if (session?.user?.id) {
+      const { data: likeData } = await supabase
+        .from('likes')
+        .select('id')
+        .eq('post_id', postId)
+        .eq('user_id', session.user.id)
+        .maybeSingle()
+
+      isLiked = !!likeData
+    }
+
     let imageUris: { uri: string }[] = []
     if (post.image_url) {
       try {
@@ -119,11 +165,13 @@ export default function FeedDetailScreen() {
         imageUri: undefined,
       },
       commentCount: commentCount ?? 0,
+      likeCount: likeCount ?? 0,
+      isLiked,
     }
 
     setData(mapped)
     setLoading(false)
-  }, [postId])
+  }, [postId, session?.user?.id])
 
   useEffect(() => {
     if (!postId) return
@@ -194,7 +242,7 @@ export default function FeedDetailScreen() {
       contentContainerStyle={{ padding: 12, backgroundColor: colors.GRAY_100 }}
       refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
     >
-      <FeedCard feed={data} isDetail />
+      <FeedCard feed={data} isDetail onLikePress={handleLikePress} />
       <View style={styles.commentSection}>
         <Text style={styles.commentTitle}>댓글</Text>
         <View style={styles.commentInputContainer}>
