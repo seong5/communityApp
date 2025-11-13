@@ -1,9 +1,13 @@
-import React from 'react'
+import { colors } from '@/constants/colors'
+import Feather from '@expo/vector-icons/Feather'
+import React, { useState } from 'react'
 import { Controller, useFormContext } from 'react-hook-form'
+import { Pressable } from 'react-native'
 import Input from './common/Input'
 
 export default function PasswordInput() {
   const { control } = useFormContext()
+  const [isVisible, setIsVisible] = useState(false)
 
   return (
     <Controller
@@ -22,8 +26,13 @@ export default function PasswordInput() {
           placeholder="비밀번호를 입력해주세요."
           value={value}
           onChangeText={onChange}
-          secureTextEntry
+          secureTextEntry={!isVisible}
           error={error?.message}
+          rightIcon={
+            <Pressable onPress={() => setIsVisible(!isVisible)}>
+              <Feather name={isVisible ? 'eye-off' : 'eye'} size={20} color={colors.GRAY_600} />
+            </Pressable>
+          }
         />
       )}
     />
