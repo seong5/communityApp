@@ -35,7 +35,7 @@ const mapRowsToFeedPosts = async (rows: PostRow[]): Promise<FeedPost[]> => {
       .in('id', userIds)
 
     if (profilesError) {
-      console.warn('profiles select error:', profilesError)
+      // 프로필 조회 실패 시 무시
     }
 
     if (profiles) {
@@ -89,12 +89,8 @@ const mapRowsToFeedPosts = async (rows: PostRow[]): Promise<FeedPost[]> => {
       if (profile) {
         if (profile.nickname) {
           authorNickname = profile.nickname
-        } else {
-          console.warn('프로필 닉네임이 비어있습니다.', profile)
         }
         authorImageUri = profile.imageUri ?? ''
-      } else {
-        console.warn('프로필 정보를 찾을 수 없습니다.', row.user_id)
       }
 
       return {

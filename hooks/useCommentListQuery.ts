@@ -131,7 +131,7 @@ export function useCommentListQuery<M extends CommentListMode>(
           .in('id', userIds)
 
         if (profileError) {
-          console.warn('댓글 프로필 조회 실패:', profileError)
+          // 프로필 조회 실패 시 무시
         }
 
         if (profiles) {

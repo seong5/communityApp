@@ -7,6 +7,7 @@ import { useActionSheet } from '@expo/react-native-action-sheet'
 import Feather from '@expo/vector-icons/Feather'
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons'
 import Octicons from '@expo/vector-icons/Octicons'
+import * as Clipboard from 'expo-clipboard'
 import { router } from 'expo-router'
 import React from 'react'
 import { Alert, Image, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native'
@@ -86,6 +87,17 @@ export default function FeedCard({ feed, isDetail = false, onLikePress }: FeedCa
       router.push(`/posting/${feed.id}`)
     }
   }
+
+  const handlePressShare = async () => {
+    try {
+      const link = `communityapp://posting/${feed.id}`
+      await Clipboard.setStringAsync(link)
+      Alert.alert('링크 복사됨', '피드 링크가 클립보드에 복사되었습니다.')
+    } catch (error) {
+      Alert.alert('복사 실패', '링크 복사에 실패했습니다.')
+    }
+  }
+
   const GoToDetail = isDetail ? View : Pressable
 
   return (
@@ -131,7 +143,7 @@ export default function FeedCard({ feed, isDetail = false, onLikePress }: FeedCa
           <MaterialCommunityIcons name="message-reply-outline" size={22} color="black" />
           <Text style={styles.menuNumber}>{feed.commentCount ?? 0}</Text>
         </Pressable>
-        <Pressable style={styles.menu}>
+        <Pressable style={styles.menu} onPress={handlePressShare}>
           <Octicons name="share" size={22} color="black" />
         </Pressable>
       </View>
