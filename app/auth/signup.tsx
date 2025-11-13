@@ -56,7 +56,6 @@ export default function SignupScreen() {
           `프로필 저장 중 오류가 발생했습니다: ${profileError.message}. 로그인 후 프로필을 확인해주세요.`
         )
       } else {
-        console.log('프로필 저장 성공:', { id: data.user.id, nickname })
       }
     } else {
       console.warn('회원가입 성공했지만 user 정보가 없습니다. 이메일 확인이 필요할 수 있습니다.')
