@@ -25,6 +25,7 @@ export default function NicknameInput() {
           onChangeText={onChange}
           submitBehavior="submit"
           error={error?.message}
+          autoCapitalize="none"
         />
       )}
     />
